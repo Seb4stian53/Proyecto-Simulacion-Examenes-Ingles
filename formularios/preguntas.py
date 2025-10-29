@@ -1,8 +1,8 @@
 import random
 import pandas as pd
-import time
+import tkinter as tk
 
-df = pd.read_csv("preguntas_ingles.csv")
+df = pd.read_csv("formularios/preguntas_ingles.csv")
 df = df.fillna("")
 
 #num_pregunta = pregunta['numero']
@@ -26,15 +26,7 @@ def obtener_categoria(num_pregunta):
 
 errores = [0,0,0,0,0,0]
 
-def validar_respuesta(n_preg):
-    start_time = time.time()
-    respuesta = input("Ingresa tu respuesta: ")
-    elapsed_time = time.time() - start_time
-
-    if elapsed_time > 60:
-        print("Tiempo agotado. Respuesta inválida.")
-        return
-
+def validar_respuesta(n_preg, respuesta):
     if df['respuestas'].iloc[n_preg-1] == respuesta:
         print("Respuesta correcta")
     else:
@@ -58,9 +50,7 @@ def obtener_clasificacion():
 
     return "Advanced"
 
-errores = [0,0,0,0,0,0]
-
-def generar_cuestionario_20():
+def generar_lista_preguntas_20():
     num_preguntas = []
     
     num_preguntas.extend(random.sample(range(1, 10), 3))
@@ -71,23 +61,90 @@ def generar_cuestionario_20():
     num_preguntas.extend(random.sample(range(71, 75), 2))    
 
     random.shuffle(num_preguntas)
+    return num_preguntas
 
-    for i in range (len(num_preguntas)): 
-        pregunta = df.iloc[num_preguntas[i]]
+def generar_lista_preguntas_40():
+    num_preguntas = []
+    
+    num_preguntas.extend(random.sample(range(1, 10), 6))
+    num_preguntas.extend(random.sample(range(11, 25), 6))
+    num_preguntas.extend(random.sample(range(26, 40), 8))
+    num_preguntas.extend(random.sample(range(41, 60), 10))
+    num_preguntas.extend(random.sample(range(61, 70), 6))
+    num_preguntas.extend(random.sample(range(71, 75), 4))      
 
-        print(f"{num_preguntas[i]}. Selecciona la respueta correcta")
-        #print(f"{i+1}. Selecciona la respueta correcta")
-        print(pregunta['pregunta'].replace("\\n", "\n"))
-        print(f"A. {pregunta['a']}\nB. {pregunta['b']}\nC. {pregunta['c']}\nD. {pregunta['d']}\n")
-        validar_respuesta(num_preguntas[i])
+    random.shuffle(num_preguntas)
+    return num_preguntas
 
-    cant_errores = 0
+errores = [0,0,0,0,0,0]
 
-    for i in range (len(errores)):
-        cant_errores += errores[i] 
+def generar_cuestionario_tkinter(num_preguntas):
+    n_preg = 0
+    root = tk.Tk()
+    root.title("Cuestionario de inglés")
+    root.geometry("600x400")
 
-    promedio = (20-cant_errores)/20
+    pregunta = df.iloc[num_preguntas[n_preg]]
+    texto_pregunta = pregunta['pregunta'].replace("\\n", "\n")
+    pregunta_texto = f"{n_preg + 1}. {texto_pregunta}"
 
-    print(f"Tu promedio es: {promedio*100}%")
-    print(f"Tu categoria es: {obtener_clasificacion()}")
+    label_pregunta = tk.Label(root, text=(pregunta_texto))
+    label_pregunta.pack()
+
+    selected_option = tk.IntVar()
+    selected_option.set(0) 
+
+    radioa = tk.Radiobutton(root, variable=selected_option, text=pregunta['a'], value=1)
+    radiob = tk.Radiobutton(root, variable=selected_option, text=pregunta['b'], value=2)
+    radioc = tk.Radiobutton(root, variable=selected_option, text=pregunta['c'], value=3)
+    radiod = tk.Radiobutton(root, variable=selected_option, text=pregunta['d'], value=4)
+
+    radioa.pack()
+    radiob.pack()
+    radioc.pack()
+    radiod.pack()
+
+    def on_button_click():
+        nonlocal n_preg
+
+        if selected_option.get() == 0:
+            return
+        
+        opciones_map = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
+
+        opcion_seleccionada = selected_option.get()
+
+        if opcion_seleccionada in opciones_map:
+            validar_respuesta(num_preguntas[n_preg] + 1, opciones_map[opcion_seleccionada])
+        
+        selected_option.set(0) 
+
+        n_preg += 1
+        if n_preg < len(num_preguntas):
+            pregunta = df.iloc[num_preguntas[n_preg]]
+            texto_pregunta = pregunta['pregunta'].replace("\\n", "\n")
+            pregunta_texto = f"{num_preguntas[n_preg] + 1}. {texto_pregunta}"
+            label_pregunta.config(text=pregunta_texto)
+            radioa.config(text=pregunta['a'])
+            radiob.config(text=pregunta['b'])
+            radioc.config(text=pregunta['c'])
+            radiod.config(text=pregunta['d'])
+        else:
+            cant_errores = 0
+            for i in range (len(errores)):
+                cant_errores += errores[i] 
+
+            promedio = (len(num_preguntas)-cant_errores)/len(num_preguntas)
+
+            print(f"Tu promedio es: {promedio*100}%")
+            print(f"Tu categoria es: {obtener_clasificacion()}")
+
+            print("Fin del cuestionario")
+            root.quit()
+
+    button = tk.Button(root, text="Siguiente", command=on_button_click)
+    button.pack()
+    root.mainloop()
     return 
+
+generar_cuestionario_tkinter(generar_lista_preguntas_20())

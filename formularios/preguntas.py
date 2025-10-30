@@ -47,7 +47,6 @@ def obtener_clasificacion():
     for nombre, indice, limite in categorias:
         if errores[indice] >= limite:
             return nombre
-
     return "Advanced"
 
 def generar_lista_preguntas_20():
@@ -91,59 +90,77 @@ def generar_cuestionario_tkinter(num_preguntas):
     label_pregunta = tk.Label(root, text=(pregunta_texto))
     label_pregunta.pack()
 
-    selected_option = tk.IntVar()
+    selected_option = tk.StringVar()
     selected_option.set(0) 
 
-    radioa = tk.Radiobutton(root, variable=selected_option, text=pregunta['a'], value=1)
-    radiob = tk.Radiobutton(root, variable=selected_option, text=pregunta['b'], value=2)
-    radioc = tk.Radiobutton(root, variable=selected_option, text=pregunta['c'], value=3)
-    radiod = tk.Radiobutton(root, variable=selected_option, text=pregunta['d'], value=4)
+    radioa = tk.Radiobutton(root, variable=selected_option, text=pregunta['a'], value='a')
+    radiob = tk.Radiobutton(root, variable=selected_option, text=pregunta['b'], value='b')
+    radioc = tk.Radiobutton(root, variable=selected_option, text=pregunta['c'], value='c')
+    radiod = tk.Radiobutton(root, variable=selected_option, text=pregunta['d'], value='d')
 
     radioa.pack()
     radiob.pack()
     radioc.pack()
     radiod.pack()
 
+    label_tiempo = tk.Label(root, text="Tiempo restante: 60s")
+    label_tiempo.pack(pady=10)
+
+    tiempo_restante = [60]  # lista para ser mutable en funciones anidadas
+    timer_id = [None]
+
+    def actualizar_tiempo():
+        if tiempo_restante[0] > 0:
+            tiempo_restante[0] -= 1
+            label_tiempo.config(text=f"Tiempo restante: {tiempo_restante[0]}s")
+            timer_id[0] = root.after(1000, actualizar_tiempo)
+        else:
+            on_button_click()
+
+
+    label_feedback = tk.Label(root, text="", fg="blue")
+    label_feedback.pack()
+
     def on_button_click():
+        print(selected_option.get())
         nonlocal n_preg
+        validar_respuesta(num_preguntas[n_preg] + 1 , selected_option.get())
 
-        if selected_option.get() == 0:
-            return
-        
-        opciones_map = {1: 'a', 2: 'b', 3: 'c', 4: 'd'}
+        if timer_id[0] is not None:
+            root.after_cancel(timer_id[0])
 
-        opcion_seleccionada = selected_option.get()
-
-        if opcion_seleccionada in opciones_map:
-            validar_respuesta(num_preguntas[n_preg] + 1, opciones_map[opcion_seleccionada])
-        
         selected_option.set(0) 
-
         n_preg += 1
+
         if n_preg < len(num_preguntas):
             pregunta = df.iloc[num_preguntas[n_preg]]
             texto_pregunta = pregunta['pregunta'].replace("\\n", "\n")
-            pregunta_texto = f"{num_preguntas[n_preg] + 1}. {texto_pregunta}"
+            #pregunta_texto = f"{num_preguntas[n_preg] + 1}. {texto_pregunta}"
+            pregunta_texto = f"{n_preg + 1}. {texto_pregunta}"
             label_pregunta.config(text=pregunta_texto)
             radioa.config(text=pregunta['a'])
             radiob.config(text=pregunta['b'])
             radioc.config(text=pregunta['c'])
             radiod.config(text=pregunta['d'])
+
+            tiempo_restante[0] = 60
+            label_tiempo.config(text=f"Tiempo restante: 60s")
+            timer_id[0] = root.after(1000, actualizar_tiempo)
         else:
-            cant_errores = 0
-            for i in range (len(errores)):
-                cant_errores += errores[i] 
 
-            promedio = (len(num_preguntas)-cant_errores)/len(num_preguntas)
+            cant_errores = sum(errores)
+            promedio = ((len(num_preguntas) - cant_errores) / len(num_preguntas))*100
 
-            print(f"Tu promedio es: {promedio*100}%")
+            print(f"Tu promedio es: {promedio}%")
             print(f"Tu categoria es: {obtener_clasificacion()}")
-
             print("Fin del cuestionario")
             root.quit()
 
     button = tk.Button(root, text="Siguiente", command=on_button_click)
     button.pack()
+
+    timer_id = [root.after(1000, actualizar_tiempo)]
+
     root.mainloop()
     return 
 

@@ -1,7 +1,7 @@
-from conn import db
+from .conn import db
 from mysql.connector import Error
 
-class PruebasHandler:
+class alumnos_querys:
     def __init__(self, db_conn):
         self.db = db_conn
 
@@ -38,6 +38,6 @@ class PruebasHandler:
             self.db.close_connection()
 
 if __name__ == "__main__":
-    handler = PruebasHandler(db)                 # crea instancia con el objeto db
+    handler = alumnos_querys(db)                 # crea instancia con el objeto db
     resultado = handler.enviar_formulario(1,1,1,1,1,1,1,1,1,1,"A")  # incluir categoria
     print(resultado)

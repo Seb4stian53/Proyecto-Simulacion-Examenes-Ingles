@@ -19,7 +19,7 @@ class AdminView(tk.Frame):
         tk.Label(self, text="Tipo: Administrador").pack()
         
         # Botones de funciones
-        tk.Button(self, text="Gestionar Usuarios", width=20).pack(pady=5)
+        tk.Button(self, text="Registrar Administrador", width=20).pack(pady=5)
         tk.Button(self, text="Reportes", width=20).pack(pady=5)
         
         tk.Button(self, text="Cerrar Sesión", command=self.logout,

@@ -25,8 +25,10 @@ class AlumnoView(tk.Frame):
         self.matricula_label.pack()
         
         # Funciones para usuario normal
-        tk.Button(self, text="Mi Perfil", width=20).pack(pady=5)
+        tk.Button(self, text="Realizar Prueba", width=20).pack(pady=5)
         tk.Button(self, text="Realizar Examen", width=20).pack(pady=5) # Ejemplo
+        tk.Button(self, text="Mis intentos", width=20).pack(pady=5)
+
         
         tk.Button(self, text="Cerrar Sesión", command=self.logout,
                  bg="red", fg="white").pack(pady=20)

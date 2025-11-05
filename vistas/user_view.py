@@ -22,24 +22,22 @@ class AlumnoView(tk.Frame):
     def generar_lista_preguntas_20(self):
         num_preguntas = []
         num_preguntas.extend(random.sample(range(1, 10), 3))
-        # ... (el resto de la función es idéntica a la tuya) ...
         num_preguntas.extend(random.sample(range(11, 25), 3))
         num_preguntas.extend(random.sample(range(26, 40), 4))
         num_preguntas.extend(random.sample(range(41, 60), 5))
         num_preguntas.extend(random.sample(range(61, 70), 3))
-        num_preguntas.extend(random.sample(range(71, 75), 2))
+        num_preguntas.extend(random.sample(range(71, 80), 2))
         random.shuffle(num_preguntas)
         return num_preguntas
 
     def generar_lista_preguntas_40(self):
-        # ... (función idéntica a la tuya para 40 preguntas) ...
         num_preguntas = []
         num_preguntas.extend(random.sample(range(1, 10), 6))
         num_preguntas.extend(random.sample(range(11, 25), 6))
         num_preguntas.extend(random.sample(range(26, 40), 8))
         num_preguntas.extend(random.sample(range(41, 60), 10))
         num_preguntas.extend(random.sample(range(61, 70), 6))
-        num_preguntas.extend(random.sample(range(71, 75), 4))
+        num_preguntas.extend(random.sample(range(71, 80), 4))
         random.shuffle(num_preguntas)
         return num_preguntas
 
@@ -84,7 +82,7 @@ class AlumnoView(tk.Frame):
             messagebox.showerror("Error de Base de Datos", intentos_result['error'])
             return
         
-        LIMITE_PRUEBAS = 3
+        LIMITE_PRUEBAS = 5
         if intentos_result.get('intentos', 0) >= LIMITE_PRUEBAS:
              messagebox.showwarning("Límite Alcanzado", f"Ya has alcanzado el límite de {LIMITE_PRUEBAS} intentos.")
              return
@@ -101,7 +99,7 @@ class AlumnoView(tk.Frame):
         # Definir la acción a realizar al finalizar la prueba (guardar los resultados).
         def on_prueba_complete(resultados):
             print("Guardando resultados de la prueba...")
-            self.formulario_manager.guardar_resultado_prueba(matricula, resultados)
+            self.formulario_manager._guardar_resultado('pruebas', matricula, resultados)
 
         # Lanzar la ventana de la prueba con los datos y la acción final.
         PruebaViewOriginal(parent=self, controller=self.controller,
@@ -110,13 +108,11 @@ class AlumnoView(tk.Frame):
                              on_complete_callback=on_prueba_complete)
                              
     def realizarExamen(self):
-        # Identificar al alumno actual.
         matricula = self.user_data.get('matricula')
         if not matricula:
             messagebox.showerror("Error de Usuario", "No se pudo identificar la matrícula del alumno.")
             return
 
-        # Validar si el alumno aún tiene intentos disponibles para el examen.
         intentos_result = self.intentos_manager.obtener_intentos_examen(matricula)
         if not intentos_result['success']:
             messagebox.showerror("Error de Base de Datos", intentos_result['error'])
@@ -127,21 +123,17 @@ class AlumnoView(tk.Frame):
              messagebox.showwarning("Límite Alcanzado", f"Ya has alcanzado el límite de {LIMITE_EXAMENES} intentos.")
              return
 
-        # Cargar todas las preguntas desde la base de datos a un DataFrame.
         df_preguntas = self.formulario_manager.obtener_preguntas_como_dataframe()
         if df_preguntas is None:
             messagebox.showerror("Error", "No se pudieron cargar las preguntas desde la base de datos.")
             return
 
-        # Generar la lista de números de preguntas específica para este examen.
         lista_preguntas_numeros = self.generar_lista_preguntas_40()
 
-        # Definir la acción a realizar al finalizar el examen (guardar los resultados).
         def on_examen_complete(resultados):
             print("Guardando resultados del examen...")
-            self.formulario_manager.guardar_resultado_examen(matricula, resultados)
+            self.formulario_manager._guardar_resultado('examenes', matricula, resultados)
 
-        # Lanzar la ventana del examen con los datos y la acción final.
         PruebaViewOriginal(parent=self, controller=self.controller,
                              dataframe_preguntas=df_preguntas,
                              lista_numeros_preguntas=lista_preguntas_numeros,

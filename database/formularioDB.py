@@ -100,23 +100,20 @@ class FormularioManager:
                 cursor.close()
             self.db.close_connection()
 
-    def guardar_resultado_prueba(self, matricula, resultados):
-        """
-        Interfaz pública para guardar un resultado en la tabla 'pruebas'.
-        """
-        return self._guardar_resultado('pruebas', matricula, resultados)
+    #def guardar_resultado_prueba(self, matricula, resultados):
+    #    """
+    #    Interfaz pública para guardar un resultado en la tabla 'pruebas'.
+    #    """
+    #    return self._guardar_resultado('pruebas', matricula, resultados)
 
-    def guardar_resultado_examen(self, matricula, resultados):
-        """
-        Interfaz pública para guardar un resultado en la tabla 'examenes'.
-        """
-        return self._guardar_resultado('examenes', matricula, resultados)
+    #def guardar_resultado_examen(self, matricula, resultados):
+    #    """
+    #    Interfaz pública para guardar un resultado en la tabla 'examenes'.
+    #    """
+    #    return self._guardar_resultado('examenes', matricula, resultados)
     
     def obtener_preguntas_como_dataframe(self):
-        """
-        Obtiene todas las preguntas de la base de datos y las devuelve
-        en un DataFrame de Pandas, imitando la estructura del CSV original.
-        """
+
         connection = self.db.get_connection()
         if not connection:
             print("Error: No se pudo conectar a la base de datos.")
@@ -124,7 +121,6 @@ class FormularioManager:
 
         cursor = None
         try:
-            # Asumimos que la tabla 'preguntas' tiene columnas que coinciden con el CSV
             query = "SELECT * FROM preguntas"
             cursor = connection.cursor(dictionary=True)
             cursor.execute(query)

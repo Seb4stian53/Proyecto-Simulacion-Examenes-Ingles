@@ -6,5 +6,6 @@ from .login_view import LoginView
 from .register_view import RegisterView
 from .admin_view import AdminView
 from .user_view import AlumnoView
+from .prueba_view_og import PruebaViewOriginal
 
-__all__ = ['LoginView', 'RegisterView', 'AdminView', 'AlumnoView']
+__all__ = ['LoginView', 'RegisterView', 'AdminView', 'AlumnoView', 'PruebaViewOriginal']

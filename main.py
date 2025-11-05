@@ -1,9 +1,6 @@
-# Este es el contenido de main.py (en la carpeta raíz)
-
 import tkinter as tk
 
-# --- IMPORTACIONES CORREGIDAS ---
-# Ahora apuntan a la nueva carpeta 'vistas'
+
 from vistas.login_view import LoginView
 from vistas.register_view import RegisterView
 from vistas.admin_view import AdminView
@@ -36,7 +33,6 @@ class MainApp(tk.Tk):
             frame.set_user_data(user_data)
         frame.tkraise()
     
-    # ... (el resto de tus métodos show_..._view) ...
     def show_login_view(self):
         self.show_frame("LoginView")
 

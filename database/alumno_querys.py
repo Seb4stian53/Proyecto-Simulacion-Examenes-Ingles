@@ -1,4 +1,4 @@
-from conn import db
+from .conn import db
 from mysql.connector import Error
 
 class Alumno_querys:

@@ -10,7 +10,7 @@ class RegisterAdminView(tk.Frame):
         self.create_widgets()
     
     def create_widgets(self):
-        tk.Label(self, text="Registro de Usuario", font=("Arial", 16)).pack(pady=20)
+        tk.Label(self, text="Registro de Administrador", font=("Arial", 16)).pack(pady=20)
         
         # Campos del formulario
         fields = [
@@ -31,7 +31,7 @@ class RegisterAdminView(tk.Frame):
         # Botones
         tk.Button(self, text="Registrar", command=self.register,
                  bg="green", fg="white", width=15).pack(pady=10)
-        tk.Button(self, text="Volver al Login", command=self.go_to_menu,
+        tk.Button(self, text="Volver al Menú", command=self.go_to_menu,
                  bg="gray", fg="white", width=15).pack(pady=5)
     
     def register(self):

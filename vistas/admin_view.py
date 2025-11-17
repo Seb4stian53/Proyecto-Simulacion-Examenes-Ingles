@@ -38,7 +38,7 @@ class AdminView(tk.Frame):
         tk.Button(self, text="Ver Estadísticas Globales", command=self.show_dashboard, 
                   width=25, height=2, bg="navy", fg="white", font=("Arial", 10)).pack(pady=5)
                   
-        tk.Button(self, text="Registrar Nuevo Usuario", command=self.go_to_register, 
+        tk.Button(self, text="Registrar Nuevo Administrador", command=self.go_to_register, 
                   width=25, height=2, font=("Arial", 10)).pack(pady=5)
 
         tk.Button(self, text="Cerrar Sesión", command=self.logout,

@@ -73,7 +73,6 @@ class PruebaViewOriginal(tk.Toplevel):
             return False
 
     def obtener_clasificacion(self):
-        # ... (Función de lógica para clasificación) ...
         categorias = [("Beginner", 0, 2),("Elementary", 1, 3),("Pre-intermediate", 2, 3),("Intermediate", 3, 4),("Upper-intermediate", 4, 2),("Advanced", 5, 2)]
         for nombre, indice, limite in categorias:
             if self.errores[indice] >= limite:
@@ -172,7 +171,21 @@ class PruebaViewOriginal(tk.Toplevel):
         
         self.on_complete_callback(resultados)
         
-        messagebox.showinfo("Fin del Cuestionario", f"Tu promedio es: {promedio:.2f}%\nTu categoria es: {categoria}\nTiempo total: {tiempo_total}s", parent=self)
+        if promedio >= 70:
+            estado_aprobacion = "¡Aprobado!"
+            titulo_mensaje = "¡Felicidades!"
+        else:
+            estado_aprobacion = "No Aprobado"
+            titulo_mensaje = "Resultados Finales"
+
+        mensaje_final = (
+            f"Resultado: {estado_aprobacion}\n\n"
+            f"Calificación Final: {promedio:.2f}%\n"
+            f"Nivel Determinado: {categoria}"
+        )
+
+        tk.messagebox.showinfo(titulo_mensaje, mensaje_final, parent=self)
+        
         self.destroy()
 
     def on_closing(self):

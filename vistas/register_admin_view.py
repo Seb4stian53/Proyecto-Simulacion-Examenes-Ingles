@@ -31,7 +31,7 @@ class RegisterAdminView(tk.Frame):
         # Botones
         tk.Button(self, text="Registrar", command=self.register,
                  bg="green", fg="white", width=15).pack(pady=10)
-        tk.Button(self, text="Volver al Login", command=self.go_to_login,
+        tk.Button(self, text="Volver al Login", command=self.go_to_menu,
                  bg="gray", fg="white", width=15).pack(pady=5)
     
     def register(self):
@@ -50,9 +50,9 @@ class RegisterAdminView(tk.Frame):
         
         if result['success']:
             messagebox.showinfo("Éxito", result['message'])
-            self.go_to_login()
+            self.go_to_menu()
         else:
             messagebox.showerror("Error", result['error'])
     
-    def go_to_login(self):
-        self.controller.show_login_view()
+    def go_to_menu(self):
+        self.controller.show_admin_view()

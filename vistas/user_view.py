@@ -5,6 +5,8 @@ import random
 from database.conn import DatabaseConnection
 from database.formularioDB import FormularioManager
 from database.validar_intentos import IntentosManager
+from database.dashboard import DashboardManager
+from vistas.dashboard_alumno_view import DashboardAlumnoView
 from vistas.prueba_view_og import PruebaViewOriginal
 
 class AlumnoView(tk.Frame):
@@ -15,6 +17,7 @@ class AlumnoView(tk.Frame):
         db_conn = DatabaseConnection()
         self.formulario_manager = FormularioManager(db_conn)
         self.intentos_manager = IntentosManager(db_conn)
+        self.dashboard_manager = DashboardManager(db_conn)
 
         self.user_data = {}
         self.create_widgets()
@@ -52,9 +55,8 @@ class AlumnoView(tk.Frame):
         
         tk.Button(self, text="Realizar Prueba (20 Preguntas)", command=self.realizarPrueba, width=30, height=2, font=("Arial", 10)).pack(pady=5)
         tk.Button(self, text="Realizar Examen (40 Preguntas)", command=self.realizarExamen, width=30, height=2, font=("Arial", 10)).pack(pady=5)
-        
-        #Pendiente ver historial
-        #tk.Button(self, text="Ver Mi Historial", command=self.ver_historial, width=30).pack(pady=5)
+        tk.Button(self, text="Ver Mi Rendimiento", command=self.show_dashboard, 
+                  width=30, height=2, font=("Arial", 10), bg="cornflowerblue", fg="white").pack(pady=5)
 
         tk.Button(self, text="Cerrar Sesión", command=self.logout, bg="tomato", fg="white").pack(side="bottom", pady=20)
 
@@ -138,3 +140,18 @@ class AlumnoView(tk.Frame):
                              dataframe_preguntas=df_preguntas,
                              lista_numeros_preguntas=lista_preguntas_numeros,
                              on_complete_callback=on_examen_complete)
+        
+    def show_dashboard(self):
+        matricula = self.user_data.get('matricula')
+        if not matricula:
+            messagebox.showerror("Error", "No se ha podido identificar al usuario.")
+            return
+
+        # 1. Obtener los datos desde el DashboardManager
+        stats_data = self.dashboard_manager.obtener_stats_alumno(matricula)
+
+        # 2. Si los datos se obtuvieron, lanzar la ventana del dashboard
+        if stats_data:
+            DashboardAlumnoView(parent=self, controller=self.controller, stats_data=stats_data)
+        else:
+            messagebox.showerror("Error", "No se pudieron cargar las estadísticas de rendimiento.")

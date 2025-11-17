@@ -8,5 +8,7 @@ from .admin_view import AdminView
 from .user_view import AlumnoView
 from .prueba_view_og import PruebaViewOriginal
 from .register_admin_view import RegisterAdminView
+from .dashboard_alumno_view import DashboardAlumnoView
+from .dashboard_admin_view import DashboardAdminView
 
-__all__ = ['LoginView', 'RegisterView', 'AdminView', 'AlumnoView', 'PruebaViewOriginal', 'RegisterAdminView']
+__all__ = ['LoginView', 'RegisterView', 'AdminView', 'AlumnoView', 'PruebaViewOriginal', 'RegisterAdminView', 'DashboardAlumnoView', 'DashboardAdminView']

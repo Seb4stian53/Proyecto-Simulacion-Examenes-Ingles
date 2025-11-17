@@ -9,6 +9,7 @@ from .alumno_querys import Alumno_querys
 from .validar_intentos import IntentosManager
 from .formularioDB import FormularioManager
 from .registrar_admin import RegistrarAdmin
+from .dashboard import DashboardManager
 
 # Esto permite importar directamente desde el paquete database
-__all__ = ['db', 'DatabaseConnection', 'Login', 'Registrar', 'Alumno_querys', 'IntentosManager', 'FormularioManager', 'RegistrarAdmin']
+__all__ = ['db', 'DatabaseConnection', 'Login', 'Registrar', 'Alumno_querys', 'IntentosManager', 'FormularioManager', 'RegistrarAdmin', 'DashboardManager']

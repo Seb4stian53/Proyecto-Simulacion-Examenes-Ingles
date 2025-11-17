@@ -44,7 +44,7 @@ class LoginView(tk.Frame):
             if user_data['tipo_usuario'] == 1:
                 self.controller.show_admin_view(user_data)
             else:
-                self.controller.show_alumno_view(user_data)
+                self.controller.show_user_view(user_data)
         else:
             messagebox.showerror("Error", result['error'])
     

@@ -8,6 +8,7 @@ from database.validar_intentos import IntentosManager
 from database.dashboard import DashboardManager
 from vistas.dashboard_alumno_view import DashboardAlumnoView
 from vistas.prueba_view_og import PruebaViewOriginal
+from vistas.historial_view import HistorialView
 
 class AlumnoView(tk.Frame):
     def __init__(self, parent, controller):
@@ -57,7 +58,7 @@ class AlumnoView(tk.Frame):
         tk.Button(self, text="Realizar Examen (40 Preguntas)", command=self.realizarExamen, width=30, height=2, font=("Arial", 10)).pack(pady=5)
         tk.Button(self, text="Ver Mi Rendimiento", command=self.show_dashboard, 
                   width=30, height=2, font=("Arial", 10), bg="cornflowerblue", fg="white").pack(pady=5)
-
+        tk.Button(self, text="Ver Mi Historial", command=self.show_historial, width=30, height=2, font=("Arial", 10), bg="cornflowerblue", fg="white").pack(pady=5)
         tk.Button(self, text="Cerrar Sesión", command=self.logout, bg="tomato", fg="white").pack(side="bottom", pady=20)
 
     def set_user_data(self, user_data):
@@ -101,7 +102,7 @@ class AlumnoView(tk.Frame):
         # Definir la acción a realizar al finalizar la prueba (guardar los resultados).
         def on_prueba_complete(resultados):
             print("Guardando resultados de la prueba...")
-            self.formulario_manager._guardar_resultado('pruebas', matricula, resultados)
+            self.formulario_manager.guardar_resultado_prueba(matricula, resultados)
 
         # Lanzar la ventana de la prueba con los datos y la acción final.
         PruebaViewOriginal(parent=self, controller=self.controller,
@@ -134,7 +135,7 @@ class AlumnoView(tk.Frame):
 
         def on_examen_complete(resultados):
             print("Guardando resultados del examen...")
-            self.formulario_manager._guardar_resultado('examenes', matricula, resultados)
+            self.formulario_manager.guardar_resultado_examen(matricula, resultados)
 
         PruebaViewOriginal(parent=self, controller=self.controller,
                              dataframe_preguntas=df_preguntas,
@@ -155,3 +156,20 @@ class AlumnoView(tk.Frame):
             DashboardAlumnoView(parent=self, controller=self.controller, stats_data=stats_data)
         else:
             messagebox.showerror("Error", "No se pudieron cargar las estadísticas de rendimiento.")
+            
+    def show_historial(self):
+        matricula = self.user_data.get('matricula')
+        if not matricula:
+            messagebox.showerror("Error", "No se ha podido identificar al usuario.")
+            return
+
+        # 1. Pedir al manager la lista de intentos
+        historial_data = self.dashboard_manager.obtener_historial_alumno(matricula)
+
+        if historial_data is not None:
+            # 2. Abrir la ventana de historial con los datos
+            HistorialView(parent=self, controller=self.controller, 
+                          historial_data=historial_data, 
+                          dashboard_manager=self.dashboard_manager)
+        else:
+            messagebox.showerror("Error", "No se pudo cargar tu historial de evaluaciones.")

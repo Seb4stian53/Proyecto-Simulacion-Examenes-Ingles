@@ -47,70 +47,96 @@ class FormularioManager:
                 cursor.close()
             self.db.close_connection()
 
-    def _guardar_resultado(self, nombre_tabla, matricula, resultados):
+    def _reemplazar_ultimo_intento(self, tipo_intento, matricula, resultados):
         """
-        Método privado para guardar un resultado en la tabla especificada ('pruebas' o 'examenes').
-        - resultados: Un diccionario con toda la información requerida por la tabla.
+        Método privado y TRANSACCIONAL que borra el último intento de un usuario
+        (si existe) y guarda el nuevo con su detalle.
         """
+        # Determinar nombres de tablas y columnas según el tipo
+        if tipo_intento == 'prueba':
+            tabla_resumen, tabla_detalle = 'pruebas', 'detalle_pruebas'
+            id_col_resumen, id_col_detalle = 'id_prueba', 'id_detalle_prueba'
+        elif tipo_intento == 'examen':
+            tabla_resumen, tabla_detalle = 'examenes', 'detalle_examenes'
+            id_col_resumen, id_col_detalle = 'id_examen', 'id_detalle_examen'
+        else:
+            return False
+
         connection = self.db.get_connection()
         if not connection:
-            print(f"Error: No hay conexión para guardar en la tabla {nombre_tabla}.")
+            print(f"Error: No hay conexión para guardar el {tipo_intento}.")
             return False
 
         cursor = None
         try:
             cursor = connection.cursor()
-            
-            # Mapeamos los nombres de categoría a los nombres de columna de errores
+            # --- INICIO DE LA TRANSACCIÓN ---
+            connection.start_transaction()
+
+            # 2. Insertar el nuevo resumen en la tabla principal (pruebas o examenes)
             errores = resultados.get('errores_por_categoria', {})
-            
-            query = f"""
-                INSERT INTO {nombre_tabla} (
+            query_resumen = f"""
+                INSERT INTO {tabla_resumen} (
                     matricula, calificacion, aciertos,
                     errores_beginner, errores_elementary, errores_preintermediate,
                     errores_intermediate, errores_upperintermediate, errores_advanced,
                     tiempo_total, categoria, fecha_realizacion
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
             """
-            
-            values = (
-                matricula,
-                resultados.get('calificacion', 0.0),
-                resultados.get('aciertos', 0),
-                errores.get('beginner', 0),
-                errores.get('elementary', 0),
-                errores.get('pre-intermediate', 0),
-                errores.get('intermediate', 0),
-                errores.get('upper-intermediate', 0),
-                errores.get('advanced', 0),
-                resultados.get('tiempo_total', 0),
-                resultados.get('categoria_obtenida', 'N/A')
+            values_resumen = (
+                matricula, resultados.get('calificacion', 0.0), resultados.get('aciertos', 0),
+                errores.get('beginner', 0), errores.get('elementary', 0),
+                errores.get('pre-intermediate', 0), errores.get('intermediate', 0),
+                errores.get('upper-intermediate', 0), errores.get('advanced', 0),
+                resultados.get('tiempo_total', 0), resultados.get('categoria_obtenida', 'N/A')
             )
+            cursor.execute(query_resumen, values_resumen)
             
-            cursor.execute(query, values)
+            # 3. Obtener el ID del resumen que acabamos de insertar
+            id_resumen_insertado = cursor.lastrowid
+            
+            # 4. Insertar cada pregunta en la tabla de detalle
+            detalle_respuestas = resultados.get('detalle_respuestas', [])
+            if detalle_respuestas:
+                query_detalle = f"""
+                    INSERT INTO {tabla_detalle} ({id_col_resumen}, id_pregunta, respuesta_usuario, es_correcta)
+                    VALUES (%s, %s, %s, %s)
+                """
+                
+                lista_valores_detalle = [
+                    (id_resumen_insertado, d['id_pregunta'], d['respuesta_usuario'], d['es_correcta'])
+                    for d in detalle_respuestas
+                ]
+                
+                cursor.executemany(query_detalle, lista_valores_detalle)
+
+            # --- Si todo salió bien, confirmar la transacción ---
             connection.commit()
-            print(f"Resultado guardado exitosamente en la tabla '{nombre_tabla}'.")
+            print(f"Nuevo intento de '{matricula}' guardado exitosamente en '{tabla_resumen}'.")
             return True
 
         except Error as e:
-            print(f"Error al guardar resultado en '{nombre_tabla}': {e}")
+            # --- Si algo falló, revertir TODOS los cambios ---
+            if connection:
+                connection.rollback()
+            print(f"Error en la transacción al guardar resultado: {e}")
             return False
         finally:
             if cursor:
                 cursor.close()
             self.db.close_connection()
 
-    #def guardar_resultado_prueba(self, matricula, resultados):
-    #    """
-    #    Interfaz pública para guardar un resultado en la tabla 'pruebas'.
-    #    """
-    #    return self._guardar_resultado('pruebas', matricula, resultados)
+    def guardar_resultado_prueba(self, matricula, resultados):
+        """
+        Interfaz pública para guardar el último resultado en la tabla 'pruebas'.
+        """
+        return self._reemplazar_ultimo_intento('prueba', matricula, resultados)
 
-    #def guardar_resultado_examen(self, matricula, resultados):
-    #    """
-    #    Interfaz pública para guardar un resultado en la tabla 'examenes'.
-    #    """
-    #    return self._guardar_resultado('examenes', matricula, resultados)
+    def guardar_resultado_examen(self, matricula, resultados):
+        """
+        Interfaz pública para guardar el último resultado en la tabla 'examenes'.
+        """
+        return self._reemplazar_ultimo_intento('examen', matricula, resultados) 
     
     def obtener_preguntas_como_dataframe(self):
 

@@ -37,6 +37,7 @@ def obtener_usuarios():
 if __name__ == "__main__":
     insertar_usuario("20005262", 0, "Sebastian Contreras", "seb4stian53")
     insertar_usuario("12345", 0, 'Carlito Hiram', 'carlex')
+    insertar_usuario("20003025", 0, 'Gabriel Cardenas', 'Gabo05')
     
     usuarios = obtener_usuarios()
     if usuarios:

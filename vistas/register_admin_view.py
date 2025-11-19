@@ -54,5 +54,7 @@ class RegisterAdminView(tk.Frame):
         else:
             messagebox.showerror("Error", result['error'])
     
-    def go_to_menu(self):
-        self.controller.show_admin_view()
+    def go_to_menu(self, user_data):
+
+        user_data = user_data if user_data else {'nombre': 'Administrador Desconocido'}
+        self.controller.show_admin_view(user_data)

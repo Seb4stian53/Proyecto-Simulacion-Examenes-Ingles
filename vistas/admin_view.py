@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox # <-- IMPORTACIÓN CLAVE AÑADIDA
 
 # --- Importaciones de tus otros módulos ---
+
 from vistas.register_admin_view import RegisterAdminView
 from database.conn import DatabaseConnection
 from database.dashboard import DashboardManager
@@ -38,8 +39,10 @@ class AdminView(tk.Frame):
         tk.Button(self, text="Ver Estadísticas Globales", command=self.show_dashboard, 
                   width=25, height=2, bg="navy", fg="white", font=("Arial", 10)).pack(pady=5)
                   
-        tk.Button(self, text="Registrar Nuevo Administrador", command=self.go_to_register, 
-                  width=25, height=2, font=("Arial", 10)).pack(pady=5)
+        # Asumimos que user_data está disponible después de ser configurado por `set_user_data`
+        tk.Button(self, text="Registrar Nuevo Administrador", command=lambda: self.go_to_register(self.user_data),
+          width=25, height=2, font=("Arial", 10)).pack(pady=5)
+
 
         tk.Button(self, text="Cerrar Sesión", command=self.logout,
                   bg="tomato", fg="white").pack(side="bottom", pady=20)
@@ -49,6 +52,7 @@ class AdminView(tk.Frame):
         Este método es llamado por el controlador para actualizar la vista
         con los datos del usuario que ha iniciado sesión.
         """
+        self.user_data = user_data 
         nombre_usuario = user_data.get('nombre', 'Usuario Desconocido')
         self.welcome_label.config(text=f"Bienvenido, {nombre_usuario}")
 
@@ -56,11 +60,11 @@ class AdminView(tk.Frame):
         """Limpia los datos de la vista y le pide al controlador que muestre el login."""
         self.welcome_label.config(text="")
         self.controller.show_login_view()
-        
-    def go_to_register(self):
+            
+    def go_to_register(self, user_data):
         """Le pide al controlador que muestre la ventana de registro."""
-        self.controller.show_register_admin_view()
-        
+        self.controller.show_register_admin_view(user_data)
+
     def show_dashboard(self):
         """
         Obtiene los datos de estadísticas globales y abre la ventana del dashboard.

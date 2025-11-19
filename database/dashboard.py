@@ -41,8 +41,9 @@ class DashboardManager:
             } if res_errores_p else {} # <-- NUEVOS DATOS PARA GRÁFICA
 
             # --- STATS DE EXÁMENES ---
-            cursor.execute("SELECT MAX(calificacion) as mejor_nota FROM examenes WHERE matricula = %s", (matricula,))
+            cursor.execute("SELECT COUNT(*) as total_examenes, MAX(calificacion) as mejor_nota FROM examenes WHERE matricula = %s", (matricula,))
             res_examenes_max = cursor.fetchone()
+            stats['total_examenes'] = res_examenes_max['total_examenes'] or 0
             stats['mejor_nota_examen'] = float(res_examenes_max['mejor_nota'] or 0.0)
 
             cursor.execute("SELECT categoria, COUNT(*) as cuenta FROM examenes WHERE matricula = %s GROUP BY categoria ORDER BY cuenta DESC LIMIT 1", (matricula,))
@@ -134,6 +135,77 @@ class DashboardManager:
             return stats
         except Error as e:
             print(f"Error al obtener stats de admin: {e}")
+            return None
+        finally:
+            if cursor: cursor.close()
+            self.db.close_connection()
+            
+    def obtener_historial_alumno(self, matricula):
+        """
+        Obtiene una lista con el resumen de todas las pruebas y exámenes de un alumno.
+        """
+        connection = self.db.get_connection()
+        if not connection: return None
+        cursor = None
+        try:
+            cursor = connection.cursor(dictionary=True)
+            
+            # Usamos UNION ALL para combinar los resultados de ambas tablas en una sola consulta
+            query = """
+                (SELECT id_prueba as id, 'Prueba' as tipo, calificacion, fecha_realizacion 
+                 FROM pruebas WHERE matricula = %s)
+                UNION ALL
+                (SELECT id_examen as id, 'Examen' as tipo, calificacion, fecha_realizacion 
+                 FROM examenes WHERE matricula = %s)
+                ORDER BY fecha_realizacion DESC
+            """
+            values = (matricula, matricula)
+            cursor.execute(query, values)
+            historial = cursor.fetchall()
+            return historial
+
+        except Error as e:
+            print(f"Error al obtener el historial del alumno: {e}")
+            return None
+        finally:
+            if cursor: cursor.close()
+            self.db.close_connection()
+
+    def obtener_detalle_evaluacion(self, tipo_evaluacion, id_evaluacion):
+        """
+        Obtiene todas las preguntas, respuestas de usuario y correctas para una
+        evaluación específica (prueba o examen).
+        """
+        # Determinar qué tablas de detalle usar basándose en el tipo
+        if tipo_evaluacion == 'Prueba':
+            tabla_detalle = 'detalle_pruebas'
+            col_id = 'id_prueba'
+        elif tipo_evaluacion == 'Examen':
+            tabla_detalle = 'detalle_examenes'
+            col_id = 'id_examen'
+        else:
+            return None
+
+        connection = self.db.get_connection()
+        if not connection: return None
+        cursor = None
+        try:
+            cursor = connection.cursor(dictionary=True)
+            # La consulta JOIN nos trae toda la información que necesitamos de una vez
+            query = f"""
+                SELECT p.pregunta, p.a, p.b, p.c, p.d, p.respuesta as respuesta_correcta, 
+                       d.respuesta_usuario, d.es_correcta
+                FROM {tabla_detalle} d
+                JOIN preguntas p ON d.id_pregunta = p.id_pregunta
+                WHERE d.{col_id} = %s
+            """
+            values = (id_evaluacion,)
+            cursor.execute(query, values)
+            detalle = cursor.fetchall()
+            return detalle
+
+        except Error as e:
+            print(f"Error al obtener el detalle de la evaluación: {e}")
             return None
         finally:
             if cursor: cursor.close()

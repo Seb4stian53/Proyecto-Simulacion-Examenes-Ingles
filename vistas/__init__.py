@@ -10,5 +10,7 @@ from .prueba_view_og import PruebaViewOriginal
 from .register_admin_view import RegisterAdminView
 from .dashboard_alumno_view import DashboardAlumnoView
 from .dashboard_admin_view import DashboardAdminView
+from .revision_view import RevisionView
+from .historial_view import HistorialView
 
-__all__ = ['LoginView', 'RegisterView', 'AdminView', 'AlumnoView', 'PruebaViewOriginal', 'RegisterAdminView', 'DashboardAlumnoView', 'DashboardAdminView']
+__all__ = ['LoginView', 'RegisterView', 'AdminView', 'AlumnoView', 'PruebaViewOriginal', 'RegisterAdminView', 'DashboardAlumnoView', 'DashboardAdminView', 'RevisionView', 'HistorialView']

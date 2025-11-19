@@ -41,8 +41,9 @@ class DashboardManager:
             } if res_errores_p else {} # <-- NUEVOS DATOS PARA GRÁFICA
 
             # --- STATS DE EXÁMENES ---
-            cursor.execute("SELECT MAX(calificacion) as mejor_nota FROM examenes WHERE matricula = %s", (matricula,))
+            cursor.execute("SELECT COUNT(*) as total_examenes, MAX(calificacion) as mejor_nota FROM examenes WHERE matricula = %s", (matricula,))
             res_examenes_max = cursor.fetchone()
+            stats['total_examenes'] = res_examenes_max['total_examenes'] or 0
             stats['mejor_nota_examen'] = float(res_examenes_max['mejor_nota'] or 0.0)
 
             cursor.execute("SELECT categoria, COUNT(*) as cuenta FROM examenes WHERE matricula = %s GROUP BY categoria ORDER BY cuenta DESC LIMIT 1", (matricula,))
